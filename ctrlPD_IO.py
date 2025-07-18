@@ -1,4 +1,4 @@
-
+# I created this file from the following github https://github.com/byu-controlbook/controlbook_public
 import numpy as np
 import VTOLParam as P
 
@@ -15,8 +15,9 @@ class ctrlPD:
         alpha0 = wn**2
         self.alpha0 = alpha0
         # compute PD gains
-        self.kp = alpha0 * (P.mc + P.mr * 2)
-        self.kd = (P.mc + P.mr * 2) * alpha1
+        self.kp = alpha0 * (P.mc + P.mr * 2) # Kp is proportional gain which provides immediate correction based on the current error
+
+        self.kd = (P.mc + P.mr * 2) * alpha1 # Kd is derivative gain which anticipates future errors which provides stability and reduces overshoot
 
         tr_th = 0.2 # rise time for inner loop #
         zeta_th = 0.707  # inner loop damping ratio 
@@ -63,17 +64,14 @@ class ctrlPD:
         z_ref = r[0][0]
         h_ref = r[1][0]
 
-        force = (P.mc+P.mr*2)*P.g
-        force_tilde = self.kp * (h_ref - h) - self.kd * hdot
-        total_force = force + force_tilde
+        force = (P.mc+P.mr*2)*P.g #This is the gravitational force, it is the sum of all mass multiplied by the gravitational constant.
+        force_tilde = self.kp * (h_ref - h) - self.kd * hdot #h_ref is the vertical reference target signal specified in the sim file. In our case its a square wave.
+                                            # h is the actual vertical location of the planar quadrotor at the current moment. Hdot is the actual vertical velocity at the current moment.
+
+        total_force = force + force_tilde 
         total_force = saturate(total_force, 2*P.fmax)
-
-
-        # outer loop: outputs the reference angle for theta
-        # note that book recommends a feed forward term because
-        # of poor DC gain on the outer loop which
-        # is why we add an addition "phi_r" at the end
-
+# Outer loop is calculating a reference angle based on the the proportional gain (kp_z) * 
+# the difference the horizontal reference signal and the actual horizontal location - the derivative gain (kd_z) * the horizontal velocity
         theta_r = self.kp_z * (z_ref - z) \
             - self.kd_z * zdot
         theta_r = saturate(theta_r, 10)
@@ -84,7 +82,9 @@ class ctrlPD:
             - self.kd_th * thetadot
         tau = saturate(tau, 10)
 
-        #return saturate(tau, P.tau_max)
+        # third level of control equations. The kp and kd calculated first are used to create the total force. The kp_th and kd_th 
+        # (inner loop - derived from the thetaddot equation of motion) are used to calculate tau with the help of theta_r 
+        # which was calculated using kp_z and kd_z (outer loop - derived from the zddot equation of motion)        
         fr = total_force/2 + tau/(2*P.d)
         fl = total_force/2 - tau/(2*P.d)       
         fr = saturate(fr, 10)

@@ -1,3 +1,4 @@
+# I created this file from the following github https://github.com/byu-controlbook/controlbook_public
 import numpy as np 
 import VTOLParam as P
 

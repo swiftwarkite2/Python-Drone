@@ -1,3 +1,5 @@
+# this file came from the following github https://github.com/byu-controlbook/controlbook_public
+# I had to enter in all the values for each of the parameters
 # VTOL Parameter File 
 import numpy as np
 

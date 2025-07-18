@@ -1,3 +1,4 @@
+# this entire file came from the following github https://github.com/byu-controlbook/controlbook_public
 import matplotlib.pyplot as plt 
 from matplotlib.lines import Line2D
 import numpy as np

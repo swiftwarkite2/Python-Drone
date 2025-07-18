@@ -1,3 +1,4 @@
+# this entire file is from the following github https://github.com/byu-controlbook/controlbook_public
 import numpy as np
 
 class signalGenerator:

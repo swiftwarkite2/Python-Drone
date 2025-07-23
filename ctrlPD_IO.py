@@ -14,10 +14,11 @@ class ctrlPD:
         self.alpha1 = alpha1
         alpha0 = wn**2
         self.alpha0 = alpha0
-        # compute PD gains
-        self.kp = alpha0 * (P.mc + P.mr * 2) # Kp is proportional gain which provides immediate correction based on the current error
-
-        self.kd = (P.mc + P.mr * 2) * alpha1 # Kd is derivative gain which anticipates future errors which provides stability and reduces overshoot
+        
+        # compute PD gains for h (vertical drone location)
+        
+        self.kp = alpha0 * (P.mc + P.mr * 2) 
+        self.kd = (P.mc + P.mr * 2) * alpha1 
 
         tr_th = 0.2 # rise time for inner loop #
         zeta_th = 0.707  # inner loop damping ratio 
@@ -27,7 +28,7 @@ class ctrlPD:
         self.theta_max = 10.0*np.pi/180.0 
         self.tau_max = 10
 
-        # PD design for inner loop
+        # compute PD gains for theta (drone angle)
         wn_th = 2.2 / tr_th
         self.kp_th = (wn_th**2 * (P.Jc + P.mr * 2 * P.d**2)) / P.d
         self.kd_th = (2 * zeta_th * wn_th * (P.Jc + P.mr * 2 * P.d**2)) / P.d 
@@ -37,9 +38,11 @@ class ctrlPD:
         # PD design for outer loop
         tr_z = M * tr_th  # rise time for outer loop
         wn_z = 2.2 / tr_z
-        force = (P.mc+P.mr*2)*P.g #
-        self.kp_z = wn_z**2 * (P.mc + 2 * P.mr)/(-force) #
-        self.kd_z = 2 * zeta_z * wn_z * (P.mc + 2 * P.mr + P.mew)/(-force)
+        
+        # compute PD gains for z (horizontal drone location)
+
+        self.kp_z = wn_z**2 * -(P.mc + 2 * P.mr)*0.066
+        self.kd_z = 2 * zeta_z * wn_z * -(P.mc + 2 * P.mr)*0.066
         
         # DC gain for outer loop
         k_DC_z = DC_th * self.kp_z \
